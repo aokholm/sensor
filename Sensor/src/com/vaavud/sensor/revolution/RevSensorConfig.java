@@ -1,6 +1,6 @@
-package com.vaavud.ars;
+package com.vaavud.sensor.revolution;
 
-public class SensorConfig {
+public class RevSensorConfig {
 	public double stationaryTimeout;
 	public double maxTiltAngle;
 	public double maxAcceleration;
@@ -8,7 +8,7 @@ public class SensorConfig {
 	public double windspeedCoef1;
 	public long revSensorUpdateRateUs;
 	
-	public SensorConfig() {
+	public RevSensorConfig() {
 		// set default values
 		this.stationaryTimeout = 8d;
 		this.maxTiltAngle = 30; // deg

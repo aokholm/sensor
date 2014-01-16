@@ -1,10 +1,10 @@
-package com.vaavud.ars.internal.processor.magnetic;
+package com.vaavud.sensor.internal.processor.magnetic;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaavud.ars.internal.processor.magnetic.model.MagneticPoint;
-import com.vaavud.ars.internal.processor.magnetic.model.MeasurementPoint;
+import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
+import com.vaavud.sensor.internal.processor.magnetic.model.MeasurementPoint;
 
 
 public class FFT {

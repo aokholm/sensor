@@ -1,11 +1,11 @@
-package com.vaavud.ars.internal.processor.magnetic;
+package com.vaavud.sensor.internal.processor.magnetic;
 
 import java.util.List;
 
-import com.vaavud.ars.SensorType;
-import com.vaavud.ars.SensorEvent;
-import com.vaavud.ars.internal.processor.magnetic.model.MagneticPoint;
-import com.vaavud.ars.internal.processor.magnetic.model.MeasurementPoint;
+import com.vaavud.sensor.SensorEvent;
+import com.vaavud.sensor.SensorType;
+import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
+import com.vaavud.sensor.internal.processor.magnetic.model.MeasurementPoint;
 
 public class MagneticProcessor {
 

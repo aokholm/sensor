@@ -1,4 +1,4 @@
-package com.vaavud.ars;
+package com.vaavud.sensor;
 
 public abstract class ProcessingSensor extends BaseSensor {
 

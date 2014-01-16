@@ -1,11 +1,10 @@
-package com.vaavud.ars.internal.revolution;
+package com.vaavud.sensor.revolution;
 
-import com.vaavud.ars.ProcessingSensor;
-import com.vaavud.ars.SensorType;
-import com.vaavud.ars.SensorConfig;
-import com.vaavud.ars.SensorEvent;
-import com.vaavud.ars.SensorListener;
-import com.vaavud.ars.internal.processor.magnetic.MagneticProcessor;
+import com.vaavud.sensor.ProcessingSensor;
+import com.vaavud.sensor.SensorEvent;
+import com.vaavud.sensor.SensorListener;
+import com.vaavud.sensor.SensorType;
+import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessor;
 
 public class RevolutionSensor extends ProcessingSensor implements SensorListener{
 	
@@ -14,7 +13,7 @@ public class RevolutionSensor extends ProcessingSensor implements SensorListener
 	
 	
 	
-	public RevolutionSensor(SensorConfig config) {
+	public RevolutionSensor(RevSensorConfig config) {
 		magneticProcessor = new MagneticProcessor(config.revSensorUpdateRateUs);
 	}
 	

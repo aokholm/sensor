@@ -1,4 +1,4 @@
-package com.vaavud.ars;
+package com.vaavud.sensor;
 
 import java.util.Arrays;
 
