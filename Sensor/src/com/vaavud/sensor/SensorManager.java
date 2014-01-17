@@ -10,8 +10,8 @@ public class SensorManager implements SensorListener{
 	private List<BaseSensor> sensorList;
 	
 	public SensorManager() {
-		listenerMap = new EnumMap<>(SensorType.class);
-		sensorList = new ArrayList<>();
+		listenerMap = new EnumMap<SensorType, List<SensorListener>>(SensorType.class);
+		sensorList = new ArrayList<BaseSensor>();
 	}
 	
 	public void addSensor(BaseSensor sensor) {
