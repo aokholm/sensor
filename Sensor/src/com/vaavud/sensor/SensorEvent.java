@@ -12,7 +12,11 @@ public final class SensorEvent {
 		this.timeUs = timeUs;
 		this.values = values;
 	}
-
+	
+	public Double getTime() {
+	  return timeUs/1000000d;
+	}
+	
 	@Override
 	public String toString() {
 		return "RevSensorEvent [sensor=" + sensor + ", timeUs=" + timeUs
