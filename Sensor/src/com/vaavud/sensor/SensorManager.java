@@ -24,9 +24,9 @@ public class SensorManager implements SensorListener{
 	}
 	
 	
-	public void start() {
+	public void start() throws Exception {
 		for (BaseSensor sensor : sensorList) {
-			sensor.start();
+		    sensor.start();
 		}
 	}
 	
