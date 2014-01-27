@@ -11,6 +11,9 @@ public class SensorManager implements SensorListener{
 	
 	public SensorManager() {
 		listenerMap = new EnumMap<SensorType, List<SensorListener>>(SensorType.class);
+		for (SensorType sensor : SensorType.values()) {
+			listenerMap.put(sensor, new ArrayList<SensorListener>());
+		}
 		sensorList = new ArrayList<BaseSensor>();
 	}
 	
@@ -39,10 +42,6 @@ public class SensorManager implements SensorListener{
 	
 	public void addListener(SensorListener sensorListener, SensorType[] sensorTypes) {
 		for (SensorType sensorType : sensorTypes) {
-			if (! listenerMap.containsKey(sensorType)) {
-				listenerMap.put(sensorType, new ArrayList<SensorListener>());
-			}
-			
 			if (listenerMap.get(sensorType).indexOf(sensorListener) == -1) {
 				listenerMap.get(sensorType).add(sensorListener);
 			}
