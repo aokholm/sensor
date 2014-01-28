@@ -4,17 +4,17 @@ import com.vaavud.sensor.ProcessingSensor;
 import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorListener;
 import com.vaavud.sensor.SensorType;
-import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessor;
+import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessorRef;
 
 public class RevolutionSensor extends ProcessingSensor implements SensorListener{
 	
 	private SensorListener listener;
-	private MagneticProcessor magneticProcessor;
+	private MagneticProcessorRef magneticProcessor;
 	
 	
 	
 	public RevolutionSensor(RevSensorConfig config) {
-		magneticProcessor = new MagneticProcessor(config.revSensorUpdateRateUs);
+		magneticProcessor = new MagneticProcessorRef(config.revSensorUpdateRateUs);
 	}
 	
 	@Override

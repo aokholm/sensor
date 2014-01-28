@@ -3,81 +3,80 @@ package com.vaavud.sensor.internal.processor.magnetic;
 import java.util.List;
 
 import com.vaavud.sensor.SensorEvent;
-import com.vaavud.sensor.SensorType;
-import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
-import com.vaavud.sensor.internal.processor.magnetic.model.MeasurementPoint;
+import com.vaavud.sensor.internal.processor.util.FrequencyProcessor;
+import com.vaavud.sensor.internal.processor.util.SensorEventList;
 
-public class MagneticProcessor {
+public class MagneticProcessor{
 
 	private FFT normalFFT;
-	private MagneticPointList mPList;
+	private SensorEventList events;
 	private long nextEventUs;
 	private long rateUs;
+	private boolean initialized;
+	private FrequencyProcessor frequencyProcessor;
 	
 	public MagneticProcessor(long rateUs) {
-		this.mPList = new MagneticPointList();
-		this.normalFFT = new FFT(70, 128, FFT.WELCH_WINDOW, FFT.QUADRATIC_INTERPOLATION);
+		events = new SensorEventList();
 		this.rateUs = rateUs;
+		frequencyProcessor = new FrequencyProcessor(events);
 	}
 	
+	public void initialize(Double testSF) {
+	  this.normalFFT = new FFT(70, 128, FFT.WELCH_WINDOW, FFT.QUADRATIC_INTERPOLATION);
+	  initialized = true;
+    }
+	
 	public SensorEvent addMeasurement(SensorEvent event) {
-		MagneticPoint magneticPoint = new MagneticPoint(event.timeUs, event.values[0], event.values[1], event.values[2]);
-		mPList.addMagneticPoint(magneticPoint);
+	  events.addEvent(event);
+	  
+	  if (timeForNewEvent(event)) {
+	    if (!initialized) {
+	      if (event.timeUs > 500000) {
+	        initialize(frequencyProcessor.getStartEndFrequency());  
+	      }
+	    }
+		return newEvent();
+	  }
 		
-		if (timeForNewEvent(magneticPoint)) {
-			return newEvent();
-		}
-		
-		return null;
-		// update
+	  return null;
 	}
 	
 	private SensorEvent newEvent () {
 		
-		List<MagneticPoint> mPoints = mPList.getLastPoints(normalFFT.getDataLength());
+		List<SensorEvent> eventSet = events.getLastEvents(normalFFT.getDataLength());
 		
-		if (mPoints.size() < normalFFT.getDataLength()) {
+		if (eventSet.size() < normalFFT.getDataLength()) {
 			System.out.println("not enought points");
 			return null;
 		}
 		
-		MeasurementPoint coreMeasurementPoint = normalFFT.getFreqAndAmp3DFFT(mPoints, getSampleFrequency(mPoints));
 		
-		if (coreMeasurementPoint == null) {
-			System.out.println("coreMeasurementPoint equals null");
+		Double SF = frequencyProcessor.getFrequency((long) 3000000);
+		SensorEvent event = normalFFT.getSensorEvent(eventSet, SF);
+		
+		if (event == null) {
+			System.out.println("freq equals null");
 			return null;
 		}
 		
-		SensorEvent event = new SensorEvent(SensorType.TYPE_FREQUENCY, 
-				mPList.last().getTimeUs(), new double[]{coreMeasurementPoint.getFrequency()} );	
 		return event;
 	}
 	
-	private boolean timeForNewEvent(MagneticPoint mP ) {
+	private boolean timeForNewEvent(SensorEvent event ) {
 		
 		if (nextEventUs == 0) {
-			nextEventUs = mP.getTimeUs();
+			nextEventUs = event.timeUs;
 		}
 		
-		if (mP.getTimeUs() >= nextEventUs) {
+		if (event.timeUs >= nextEventUs) {
 			
 			nextEventUs = nextEventUs + rateUs;
 			// set next time
-			if (nextEventUs < mP.getTimeUs() ) {
-				nextEventUs = mP.getTimeUs() + rateUs;
+			if (nextEventUs < event.timeUs ) {
+				nextEventUs = event.timeUs + rateUs;
 			}
 			return true;
 		}
 		return false;
 	}
-	
-	
-	private Double getSampleFrequency(List<MagneticPoint> mPoints) {
-		long timeDiff = mPoints.get(mPoints.size()-1).getTimeUs() - mPoints.get(0).getTimeUs();
-		double sampleFrequency = (normalFFT.getDataLength() -1) / (double) timeDiff * 1000000;
-		return sampleFrequency;
-		
-	}
-
-
 }

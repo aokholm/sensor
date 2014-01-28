@@ -17,6 +17,18 @@ public final class SensorEvent {
 	  return timeUs/1000000d;
 	}
 	
+	public Double getX() {
+	  return values[0];
+	}
+	
+	public Double getY() {
+      return values[1];
+    }
+	
+	public Double getZ() {
+      return values[2];
+    }
+	
 	@Override
 	public String toString() {
 		return "RevSensorEvent [sensor=" + sensor + ", timeUs=" + timeUs

@@ -3,6 +3,8 @@ package com.vaavud.sensor.internal.processor.magnetic;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaavud.sensor.SensorEvent;
+import com.vaavud.sensor.SensorType;
 import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
 import com.vaavud.sensor.internal.processor.magnetic.model.MeasurementPoint;
 
@@ -94,6 +96,57 @@ public class FFT {
 //		
 //		return mySpeedAndAmp;
 //	}
+	
+	public SensorEvent getSensorEvent(List<SensorEvent> events, Double SF) {
+	  
+	  double frequencyMean;
+      double frequencyRMSD;
+      double amplitudeMean;
+      
+      List<Double> xAxis = new ArrayList<Double>(dataLength);
+      List<Double> yAxis = new ArrayList<Double>(dataLength);
+      List<Double> zAxis = new ArrayList<Double>(dataLength);
+      
+      for (int i = 0; i < events.size(); i++) {
+          xAxis.add(events.get(i).getX());
+          yAxis.add(events.get(i).getY());
+          zAxis.add(events.get(i).getZ());
+      }
+      
+      FreqAmp myFAx = getFreqAndAmpOneAxisFFT(xAxis, SF);
+      if (myFAx == null) {
+          return null;
+      }
+      
+      FreqAmp myFAy = getFreqAndAmpOneAxisFFT(yAxis, SF);
+      if (myFAy == null) {
+          return null;
+      }
+      
+      FreqAmp myFAz = getFreqAndAmpOneAxisFFT(zAxis, SF);
+      if (myFAz == null) {
+          return null;
+      }
+      
+      // calculate frequency RMS
+      
+      frequencyMean = (myFAx.frequency + myFAy.frequency + myFAz.frequency) /3;
+      frequencyRMSD = Math.sqrt( 0.3333333333D * Math.pow(myFAx.frequency - frequencyMean, 2) 
+          +  Math.pow(myFAy.frequency - frequencyMean, 2) + Math.pow(myFAz.frequency - frequencyMean, 2));
+      amplitudeMean = (myFAx.amplitude + myFAy.amplitude + myFAz.amplitude) /3;
+              
+                      
+//    Log.v(MainActivity.TAG, String.format("wind: %f, %f, %f amp:  %f, %f, %f, fRMSD: %f",
+//                myFAx.frequency, myFAy.frequency, myFAz.frequency,  myFAx.amplitude, myFAy.amplitude, myFAz.amplitude, frequencyRMSD));
+      
+      if (frequencyRMSD < 0.2 && frequencyMean > 1 && amplitudeMean > 0.3) {
+          SensorEvent event = new SensorEvent(SensorType.TYPE_FREQUENCY, 
+              events.get(events.size()-1).timeUs, new double[]{frequencyMean, amplitudeMean, SF});              
+          return event;
+      }
+      
+      return null;     
+    }
 	
 	
 	public MeasurementPoint getFreqAndAmp3DFFT(List<MagneticPoint> magneticPoints, Double sampleFrequency) {
