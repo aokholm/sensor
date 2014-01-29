@@ -136,7 +136,7 @@ public class FFT {
       amplitudeMean = (myFAx.amplitude + myFAy.amplitude + myFAz.amplitude) /3;
               
                       
-//    Log.v(MainActivity.TAG, String.format("wind: %f, %f, %f amp:  %f, %f, %f, fRMSD: %f",
+//      System.out.println( String.format("wind: %f, %f, %f amp:  %f, %f, %f, fRMSD: %f",
 //                myFAx.frequency, myFAy.frequency, myFAz.frequency,  myFAx.amplitude, myFAy.amplitude, myFAz.amplitude, frequencyRMSD));
       
       if (frequencyRMSD < 0.2 && frequencyMean > 1 && amplitudeMean > 0.3) {
@@ -187,7 +187,7 @@ public class FFT {
 		amplitudeMean = (myFAx.amplitude + myFAy.amplitude + myFAz.amplitude) /3;
 				
 						
-//		Log.v(MainActivity.TAG, String.format("wind: %f, %f, %f amp:  %f, %f, %f, fRMSD: %f",
+//		System.out.println(String.format("wind: %f, %f, %f amp:  %f, %f, %f, fRMSD: %f",
 //					myFAx.frequency, myFAy.frequency, myFAz.frequency,  myFAx.amplitude, myFAy.amplitude, myFAz.amplitude, frequencyRMSD));
 		
 		if (frequencyRMSD < 0.2 && frequencyMean > 1 && amplitudeMean > 0.3) {

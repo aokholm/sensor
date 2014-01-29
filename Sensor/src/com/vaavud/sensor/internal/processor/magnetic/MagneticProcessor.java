@@ -30,12 +30,14 @@ public class MagneticProcessor{
 	  events.addEvent(event);
 	  
 	  if (timeForNewEvent(event)) {
-	    if (!initialized) {
-	      if (event.timeUs > 500000) {
-	        initialize(frequencyProcessor.getStartEndFrequency());  
-	      }
+	    if (initialized) {
+	      return newEvent();
 	    }
-		return newEvent();
+	    else {
+	      if (event.timeUs > 500000) {
+            initialize(frequencyProcessor.getStartEndFrequency());  
+          }
+	    }
 	  }
 		
 	  return null;
@@ -46,16 +48,16 @@ public class MagneticProcessor{
 		List<SensorEvent> eventSet = events.getLastEvents(normalFFT.getDataLength());
 		
 		if (eventSet.size() < normalFFT.getDataLength()) {
-			System.out.println("not enought points");
+			//System.out.println("not enought points");
 			return null;
 		}
 		
 		
-		Double SF = frequencyProcessor.getFrequency((long) 3000000);
+		Double SF = frequencyProcessor.getFrequency((long) 5000000);
 		SensorEvent event = normalFFT.getSensorEvent(eventSet, SF);
 		
 		if (event == null) {
-			System.out.println("freq equals null");
+			//System.out.println("freq equals null");
 			return null;
 		}
 		

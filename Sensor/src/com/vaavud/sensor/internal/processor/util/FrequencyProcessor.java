@@ -37,7 +37,7 @@ public class FrequencyProcessor {
   }
   
   private Double getFrequency(long start, long end, long N) {
-    double SF = end-start / ((double) (N-1) * 1000000) ;
+    double SF = ((double) (N-1) *1000000) / (end-start);
     lastFrequency = SF;
     return SF;
   }

@@ -50,7 +50,7 @@ public class MagneticProcessorRef {
 			return null;
 		}
 		
-		SensorEvent event = new SensorEvent(SensorType.TYPE_FREQUENCY, 
+		SensorEvent event = new SensorEvent(SensorType.TYPE_FREQUENCY_REF, 
 				mPList.last().getTimeUs(), new double[]{coreMeasurementPoint.getFrequency(), coreMeasurementPoint.getAmplitude(), sampleF} );	
 		return event;
 	}
