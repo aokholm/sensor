@@ -4,6 +4,9 @@ import java.util.List;
 
 import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorType;
+import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
+import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
+import com.vaavud.sensor.internal.processor.magnetic.FFT.Window;
 import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
 import com.vaavud.sensor.internal.processor.magnetic.model.MeasurementPoint;
 
@@ -16,7 +19,7 @@ public class MagneticProcessorRef {
 	
 	public MagneticProcessorRef(long rateUs) {
 		this.mPList = new MagneticPointList();
-		this.normalFFT = new FFT(70, 128, FFT.WELCH_WINDOW, FFT.QUADRATIC_INTERPOLATION);
+		this.normalFFT = new FFT(70, 128, Window.WELCH_WINDOW, Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null);
 		this.rateUs = rateUs;
 	}
 	

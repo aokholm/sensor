@@ -3,6 +3,9 @@ package com.vaavud.sensor.internal.processor.magnetic;
 import java.util.List;
 
 import com.vaavud.sensor.SensorEvent;
+import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
+import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
+import com.vaavud.sensor.internal.processor.magnetic.FFT.Window;
 import com.vaavud.sensor.internal.processor.util.FrequencyProcessor;
 import com.vaavud.sensor.internal.processor.util.SensorEventList;
 
@@ -19,10 +22,12 @@ public class MagneticProcessor{
 		events = new SensorEventList();
 		this.rateUs = rateUs;
 		frequencyProcessor = new FrequencyProcessor(events);
+		initialized = false;
 	}
 	
 	public void initialize(Double testSF) {
-	  this.normalFFT = new FFT(70, 128, FFT.WELCH_WINDOW, FFT.QUADRATIC_INTERPOLATION);
+	  this.normalFFT = new FFT(128, 128, Window.RETANGULAR_WINDOW, 
+	        Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null);
 	  initialized = true;
     }
 	
@@ -34,7 +39,7 @@ public class MagneticProcessor{
 	      return newEvent();
 	    }
 	    else {
-	      if (event.timeUs > 500000) {
+	      if (events.size() > 50) {
             initialize(frequencyProcessor.getStartEndFrequency());  
           }
 	    }
@@ -53,7 +58,7 @@ public class MagneticProcessor{
 		}
 		
 		
-		Double SF = frequencyProcessor.getFrequency((long) 5000000);
+		Double SF = frequencyProcessor.getFrequency((long) 2000000);
 		SensorEvent event = normalFFT.getSensorEvent(eventSet, SF);
 		
 		if (event == null) {
