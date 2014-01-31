@@ -2,8 +2,9 @@ package com.vaavud.sensor.internal.processor.magnetic;
 
 import java.util.List;
 
+import com.vaavud.sensor.Sensor;
+import com.vaavud.sensor.Sensor.Type;
 import com.vaavud.sensor.SensorEvent;
-import com.vaavud.sensor.SensorType;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Window;
@@ -16,11 +17,12 @@ public class MagneticProcessorRef {
 	private MagneticPointList mPList;
 	private long nextEventUs;
 	private long rateUs;
-	
+	private Sensor sensor;
 	public MagneticProcessorRef(long rateUs) {
 		this.mPList = new MagneticPointList();
 		this.normalFFT = new FFT(70, 128, Window.WELCH_WINDOW, Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null);
 		this.rateUs = rateUs;
+		this.sensor = new Sensor(Type.FREQUENCY, "Freq_Reference");
 	}
 	
 	public SensorEvent addMeasurement(SensorEvent event) {
@@ -53,7 +55,7 @@ public class MagneticProcessorRef {
 			return null;
 		}
 		
-		SensorEvent event = new SensorEvent(SensorType.TYPE_FREQUENCY_REF, 
+		SensorEvent event = new SensorEvent(sensor, 
 				mPList.last().getTimeUs(), new double[]{coreMeasurementPoint.getFrequency(), coreMeasurementPoint.getAmplitude(), sampleF} );	
 		return event;
 	}

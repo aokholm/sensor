@@ -3,11 +3,11 @@ package com.vaavud.sensor;
 import java.util.Arrays;
 
 public final class SensorEvent {
-	public final SensorType sensor;
+	public final Sensor sensor;
 	public final long timeUs;
 	public final double values[];
 	
-	public SensorEvent(SensorType sensor, long timeUs, double[] values) {
+	public SensorEvent(Sensor sensor, long timeUs, double[] values) {
 		this.sensor = sensor;
 		this.timeUs = timeUs;
 		this.values = values;

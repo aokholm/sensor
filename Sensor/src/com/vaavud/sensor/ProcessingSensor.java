@@ -13,7 +13,7 @@ public abstract class ProcessingSensor extends BaseSensor {
 	
 	public abstract SensorListener getReciever();
 	
-	public abstract SensorType[] getSensorTypes();
+	public abstract Sensor.Type[] getSensorTypes();
 	
 
 	

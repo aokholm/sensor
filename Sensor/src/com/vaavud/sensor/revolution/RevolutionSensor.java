@@ -1,9 +1,9 @@
 package com.vaavud.sensor.revolution;
 
 import com.vaavud.sensor.ProcessingSensor;
+import com.vaavud.sensor.Sensor;
 import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorListener;
-import com.vaavud.sensor.SensorType;
 import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessor;
 import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessorRef;
 
@@ -21,7 +21,7 @@ public class RevolutionSensor extends ProcessingSensor implements SensorListener
 	
 	@Override
 	public void newEvent(SensorEvent event) {
-		if (event.sensor == SensorType.TYPE_MAGNETIC_FIELD) {
+		if (event.sensor.getType() == Sensor.Type.MAGNETIC_FIELD) {
 			SensorEvent newEvent = (magneticProcessor).addMeasurement(event);
 			SensorEvent newEventRef = (magneticProcessorRef).addMeasurement(event);
 			
@@ -51,11 +51,11 @@ public class RevolutionSensor extends ProcessingSensor implements SensorListener
 	}
 
 	@Override
-	public SensorType[] getSensorTypes() {
-		SensorType[] sensorTypes = new SensorType[]{
-				SensorType.TYPE_ACCELEROMETER,
-				SensorType.TYPE_GYROSCOPE,
-				SensorType.TYPE_MAGNETIC_FIELD};
+	public Sensor.Type[] getSensorTypes() {
+	    Sensor.Type[] sensorTypes = new Sensor.Type[]{
+	            Sensor.Type.ACCELEROMETER,
+	            Sensor.Type.GYROSCOPE,
+	            Sensor.Type.MAGNETIC_FIELD};
 		
 		return sensorTypes;
 	}

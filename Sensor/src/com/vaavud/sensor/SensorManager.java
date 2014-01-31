@@ -6,13 +6,13 @@ import java.util.List;
 
 public class SensorManager implements SensorListener{
 	
-	private EnumMap<SensorType, List<SensorListener>> listenerMap;
+	private EnumMap<Sensor.Type, List<SensorListener>> listenerMap;
 	private List<BaseSensor> sensorList;
 	
 	public SensorManager() {
-		listenerMap = new EnumMap<SensorType, List<SensorListener>>(SensorType.class);
-		for (SensorType sensor : SensorType.values()) {
-			listenerMap.put(sensor, new ArrayList<SensorListener>());
+		listenerMap = new EnumMap<Sensor.Type, List<SensorListener>>(Sensor.Type.class);
+		for (Sensor.Type sensorType : Sensor.Type.values()) {
+			listenerMap.put(sensorType, new ArrayList<SensorListener>());
 		}
 		sensorList = new ArrayList<BaseSensor>();
 	}
@@ -40,16 +40,16 @@ public class SensorManager implements SensorListener{
 	}
 	
 	
-	public void addListener(SensorListener sensorListener, SensorType[] sensorTypes) {
-		for (SensorType sensorType : sensorTypes) {
+	public void addListener(SensorListener sensorListener, Sensor.Type[] sensorTypes) {
+		for (Sensor.Type sensorType : sensorTypes) {
 			if (listenerMap.get(sensorType).indexOf(sensorListener) == -1) {
 				listenerMap.get(sensorType).add(sensorListener);
 			}
 		}
 	}
 
-	public void removeListener(SensorListener sensorListener, SensorType[] sensorTypes) {
-		for (SensorType sensorType : sensorTypes) {
+	public void removeListener(SensorListener sensorListener, Sensor.Type[] sensorTypes) {
+		for (Sensor.Type sensorType : sensorTypes) {
 			if (listenerMap.containsKey(sensorType)) {
 				listenerMap.get(sensorType).remove(sensorListener);
 			}
@@ -57,7 +57,7 @@ public class SensorManager implements SensorListener{
 	}
 	
 	public void removeListener(SensorListener sensorListener) {
-		for (EnumMap.Entry<SensorType, List<SensorListener>> entry : listenerMap.entrySet()) {
+		for (EnumMap.Entry<Sensor.Type, List<SensorListener>> entry : listenerMap.entrySet()) {
 			entry.getValue().remove(sensorListener);
 		}
 	}
@@ -65,7 +65,7 @@ public class SensorManager implements SensorListener{
 
 	@Override
 	public void newEvent(SensorEvent event) {
-		List<SensorListener> sensorListeners = listenerMap.get(event.sensor);
+		List<SensorListener> sensorListeners = listenerMap.get(event.sensor.getType());
 		
 		for (SensorListener listener : sensorListeners) {
 			listener.newEvent(event);
