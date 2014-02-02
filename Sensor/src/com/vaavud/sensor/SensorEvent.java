@@ -1,37 +1,32 @@
 package com.vaavud.sensor;
 
-import java.util.Arrays;
 
-public final class SensorEvent {
-	public final Sensor sensor;
-	public final long timeUs;
-	public final double values[];
+public class SensorEvent {
+	private final Sensor sensor;
+	private final long timeUs;
+
 	
-	public SensorEvent(Sensor sensor, long timeUs, double[] values) {
+	public SensorEvent(Sensor sensor, long timeUs) {
 		this.sensor = sensor;
 		this.timeUs = timeUs;
-		this.values = values;
 	}
 	
 	public Double getTime() {
 	  return timeUs/1000000d;
 	}
 	
-	public Double getX() {
-	  return values[0];
-	}
-	
-	public Double getY() {
-      return values[1];
+	public Sensor getSensor() {
+        return sensor;
     }
 	
-	public Double getZ() {
-      return values[2];
+	public long getTimeUs() {
+        return timeUs;
     }
 	
-	@Override
-	public String toString() {
-		return "RevSensorEvent [sensor=" + sensor + ", timeUs=" + timeUs
-				+ ", values=" + Arrays.toString(values) + "]";
-	}
+    @Override
+    public String toString() {
+        return "SensorEvent [sensor=" + sensor + ", timeUs=" + timeUs + "]";
+    }
+	
+	
 }

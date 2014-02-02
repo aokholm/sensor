@@ -65,7 +65,7 @@ public class SensorManager implements SensorListener{
 
 	@Override
 	public void newEvent(SensorEvent event) {
-		List<SensorListener> sensorListeners = listenerMap.get(event.sensor.getType());
+		List<SensorListener> sensorListeners = listenerMap.get(event.getSensor().getType());
 		
 		for (SensorListener listener : sensorListeners) {
 			listener.newEvent(event);

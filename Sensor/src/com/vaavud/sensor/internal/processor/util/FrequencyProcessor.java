@@ -6,16 +6,16 @@ import com.vaavud.sensor.SensorEvent;
 
 
 public class FrequencyProcessor {
-  SensorEventList list;
+  SensorEventList<? extends SensorEvent> list;
   private Double lastFrequency;
   
-  public FrequencyProcessor(SensorEventList list) {
+  public FrequencyProcessor(SensorEventList<? extends SensorEvent> list) {
     this.list = list;
   }
   
   public Double getStartEndFrequency() {
-    Long start = list.first().timeUs;
-    Long end = list.last().timeUs;
+    Long start = list.first().getTimeUs();
+    Long end = list.last().getTimeUs();
     Integer N = list.size();
     
     return getFrequency(start, end, N);
@@ -26,9 +26,9 @@ public class FrequencyProcessor {
       return lastFrequency;
     }
     
-    List<SensorEvent> events= list.getLastEvents(nPoints);
-    Long start = events.get(0).timeUs;
-    Long end = events.get(events.size() -1).timeUs;
+    List<? extends SensorEvent> events= list.getLastEvents(nPoints);
+    Long start = events.get(0).getTimeUs();
+    Long end = events.get(events.size() -1).getTimeUs();
     if (end-start > Us) {
       System.out.println("Divide N: " + nPoints + " start: " + start + "end: " + end);
       return getFrequencyPoints(nPoints/2, Us);

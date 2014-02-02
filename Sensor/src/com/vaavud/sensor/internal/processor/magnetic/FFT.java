@@ -7,6 +7,8 @@ import java.util.List;
 import com.vaavud.sensor.Sensor;
 import com.vaavud.sensor.Sensor.Type;
 import com.vaavud.sensor.SensorEvent;
+import com.vaavud.sensor.SensorEvent3D;
+import com.vaavud.sensor.SensorEventFreq;
 import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
 import com.vaavud.sensor.internal.processor.magnetic.model.MeasurementPoint;
 
@@ -66,7 +68,7 @@ public class FFT {
         myFFTAlgorithm = new FFTAlgorithm(FFTLength);
     }
 
-    public SensorEvent getSensorEvent(List<SensorEvent> events, Double SF) {
+    public SensorEvent getSensorEvent(List<SensorEvent3D> events, Double SF) {
 
         List<Double> xAxis = new ArrayList<Double>(dataLength);
         List<Double> yAxis = new ArrayList<Double>(dataLength);
@@ -98,8 +100,9 @@ public class FFT {
         List<Double> averageFftResult = averageFftResult(Arrays
                 .<List<Double>> asList(fftResultx, fftResulty, fftResultz));
 
-        applyFilter(averageFftResult);
-        // calculate frequency RMS
+        if (filtering) {
+            applyFilter(averageFftResult);
+        }
 
         FreqAmp freqAmp = speedAndAmpFromFFTResult(averageFftResult, SF);
 
@@ -107,9 +110,8 @@ public class FFT {
             return null;
         }
 
-        SensorEvent event = new SensorEvent(sensor,
-                events.get(events.size() - 1).timeUs, new double[] {
-                        freqAmp.frequency, freqAmp.amplitude, SF });
+        SensorEvent event = new SensorEventFreq(sensor,
+                events.get(events.size() - 1).getTimeUs(), freqAmp.frequency, freqAmp.amplitude, SF);
         return event;
     }
 

@@ -3,6 +3,7 @@ package com.vaavud.sensor.internal.processor.magnetic;
 import java.util.List;
 
 import com.vaavud.sensor.SensorEvent;
+import com.vaavud.sensor.SensorEvent3D;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Window;
@@ -12,14 +13,14 @@ import com.vaavud.sensor.internal.processor.util.SensorEventList;
 public class MagneticProcessor{
 
 	private FFT normalFFT;
-	private SensorEventList events;
+	private SensorEventList<SensorEvent3D> events;
 	private long nextEventUs;
 	private long rateUs;
 	private boolean initialized;
 	private FrequencyProcessor frequencyProcessor;
 	
 	public MagneticProcessor(long rateUs) {
-		events = new SensorEventList();
+		events = new SensorEventList<SensorEvent3D>();
 		this.rateUs = rateUs;
 		frequencyProcessor = new FrequencyProcessor(events);
 		initialized = false;
@@ -27,11 +28,11 @@ public class MagneticProcessor{
 	
 	public void initialize(Double testSF) {
 	  this.normalFFT = new FFT(128, 128, Window.RETANGULAR_WINDOW, 
-	        Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null);
+	        Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, 8);
 	  initialized = true;
     }
 	
-	public SensorEvent addMeasurement(SensorEvent event) {
+	public SensorEvent addMeasurement(SensorEvent3D event) {
 	  events.addEvent(event);
 	  
 	  if (timeForNewEvent(event)) {
@@ -50,7 +51,7 @@ public class MagneticProcessor{
 	
 	private SensorEvent newEvent () {
 		
-		List<SensorEvent> eventSet = events.getLastEvents(normalFFT.getDataLength());
+		List<SensorEvent3D> eventSet = events.getLastEvents(normalFFT.getDataLength());
 		
 		if (eventSet.size() < normalFFT.getDataLength()) {
 			//System.out.println("not enought points");
@@ -72,15 +73,15 @@ public class MagneticProcessor{
 	private boolean timeForNewEvent(SensorEvent event ) {
 		
 		if (nextEventUs == 0) {
-			nextEventUs = event.timeUs;
+			nextEventUs = event.getTimeUs();
 		}
 		
-		if (event.timeUs >= nextEventUs) {
+		if (event.getTimeUs() >= nextEventUs) {
 			
 			nextEventUs = nextEventUs + rateUs;
 			// set next time
-			if (nextEventUs < event.timeUs ) {
-				nextEventUs = event.timeUs + rateUs;
+			if (nextEventUs < event.getTimeUs() ) {
+				nextEventUs = event.getTimeUs() + rateUs;
 			}
 			return true;
 		}

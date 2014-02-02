@@ -5,6 +5,8 @@ import java.util.List;
 import com.vaavud.sensor.Sensor;
 import com.vaavud.sensor.Sensor.Type;
 import com.vaavud.sensor.SensorEvent;
+import com.vaavud.sensor.SensorEvent3D;
+import com.vaavud.sensor.SensorEventFreq;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Window;
@@ -25,8 +27,8 @@ public class MagneticProcessorRef {
 		this.sensor = new Sensor(Type.FREQUENCY, "Freq_Reference");
 	}
 	
-	public SensorEvent addMeasurement(SensorEvent event) {
-		MagneticPoint magneticPoint = new MagneticPoint(event.timeUs, event.values[0], event.values[1], event.values[2]);
+	public SensorEvent addMeasurement(SensorEvent3D event) {
+		MagneticPoint magneticPoint = new MagneticPoint(event.getTimeUs(), event.getX(), event.getY(), event.getY());
 		mPList.addMagneticPoint(magneticPoint);
 		
 		if (timeForNewEvent(magneticPoint)) {
@@ -42,7 +44,6 @@ public class MagneticProcessorRef {
 		List<MagneticPoint> mPoints = mPList.getLastPoints(normalFFT.getDataLength());
 		
 		if (mPoints.size() < normalFFT.getDataLength()) {
-			System.out.println("not enought points");
 			return null;
 		}
 		
@@ -51,12 +52,11 @@ public class MagneticProcessorRef {
 		MeasurementPoint coreMeasurementPoint = normalFFT.getFreqAndAmp3DFFT(mPoints, sampleF);
 		
 		if (coreMeasurementPoint == null) {
-			System.out.println("coreMeasurementPoint equals null");
 			return null;
 		}
 		
-		SensorEvent event = new SensorEvent(sensor, 
-				mPList.last().getTimeUs(), new double[]{coreMeasurementPoint.getFrequency(), coreMeasurementPoint.getAmplitude(), sampleF} );	
+		SensorEventFreq event = new SensorEventFreq(sensor, 
+				mPList.last().getTimeUs(), coreMeasurementPoint.getFrequency(), coreMeasurementPoint.getAmplitude(), sampleF);	
 		return event;
 	}
 	
