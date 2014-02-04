@@ -24,12 +24,13 @@ public class RevolutionSensor extends ProcessingSensor implements SensorListener
 	public void newEvent(SensorEvent event) {
 		if (event.getSensor().getType() == Sensor.Type.MAGNETIC_FIELD) {
 			SensorEvent newEvent = (magneticProcessor).addMeasurement((SensorEvent3D) event);
-			SensorEvent newEventRef = (magneticProcessorRef).addMeasurement((SensorEvent3D) event);
 			
 			if (newEvent != null) {
 				listener.newEvent(newEvent);
 			}
-	        if (newEventRef != null) {
+			
+			SensorEvent newEventRef = (magneticProcessorRef).addMeasurement((SensorEvent3D) event);
+            if (newEventRef != null) {
                listener.newEvent(newEventRef);
             }
 		}
