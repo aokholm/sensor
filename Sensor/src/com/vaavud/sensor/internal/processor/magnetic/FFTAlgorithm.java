@@ -57,7 +57,7 @@ public class FFTAlgorithm {
 
 		for (int i = 0; i < (FFTLength / 2 + 1); i++) {
 			fftPower.add((double) (Math.sqrt(Math.pow(x[i], 2)
-					+ Math.pow(y[i], 2)) * 2 / FFTLength));
+					+ Math.pow(y[i], 2)) * 2 / realData.size()));
 		}
 
 		return fftPower;

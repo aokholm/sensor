@@ -1,23 +1,27 @@
 package com.vaavud.sensor.internal.processor.magnetic;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.vaavud.sensor.Sensor;
+import com.vaavud.sensor.Sensor.Type;
 import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorEvent3D;
+import com.vaavud.sensor.SensorListener;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
-import com.vaavud.sensor.internal.processor.magnetic.FFT.Window;
 import com.vaavud.sensor.internal.processor.util.FrequencyProcessor;
 import com.vaavud.sensor.internal.processor.util.SensorEventList;
 
 public class MagneticProcessor{
 
-	private FFT normalFFT;
+	private List<FFT> FFTs;
 	private SensorEventList<SensorEvent3D> events;
 	private long nextEventUs;
 	private long rateUs;
 	private boolean initialized;
 	private FrequencyProcessor frequencyProcessor;
+	private SensorListener listener;
 	
 	public MagneticProcessor(long rateUs) {
 		events = new SensorEventList<SensorEvent3D>();
@@ -27,17 +31,42 @@ public class MagneticProcessor{
 	}
 	
 	public void initialize(Double testSF) {
-	  this.normalFFT = new FFT(128, 128, Window.RETANGULAR_WINDOW, 
-	        Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, 8);
+	    
+	  FFTs = new ArrayList<FFT>();  
+	    
+	  FFTs.add(getFFT(0.5, testSF));
+	  FFTs.add(getFFT(1d, testSF));
+	  FFTs.add(getFFT(2.0, testSF));
+	  
 	  initialized = true;
     }
 	
-	public SensorEvent addMeasurement(SensorEvent3D event) {
+	private FFT getFFT(Double timeConstant, Double testSF) {
+	      int dataLength = (int) Math.round(testSF*timeConstant);
+	      int fftLength = 16;
+	      
+	      while (dataLength*4 > fftLength) {
+	        fftLength = fftLength*2;
+	      }
+	      
+	      Sensor sensor = new Sensor(Type.FREQUENCY, timeConstant.toString().concat(" new"));
+	        
+	      return new FFT(dataLength, fftLength, Window.HANN, 
+	            Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null, sensor, listener); 
+	    
+	}
+	
+	public void setListener(SensorListener listener) {
+        this.listener = listener;
+    }
+	
+	
+	public void addMeasurement(SensorEvent3D event) {
 	  events.addEvent(event);
 	  
 	  if (timeForNewEvent(event)) {
 	    if (initialized) {
-	      return newEvent();
+	      newEvent();
 	    }
 	    else {
 	      if (events.size() > 50) {
@@ -45,29 +74,21 @@ public class MagneticProcessor{
           }
 	    }
 	  }
-		
-	  return null;
 	}
 	
-	private SensorEvent newEvent () {
+	private void newEvent () {
 		
-		List<SensorEvent3D> eventSet = events.getLastEvents(normalFFT.getDataLength());
-		
-		if (eventSet.size() < normalFFT.getDataLength()) {
-			//System.out.println("not enought points");
-			return null;
-		}
-		
-		
-		Double SF = frequencyProcessor.getFrequency((long) 2000000);
-		SensorEvent event = normalFFT.getSensorEvent(eventSet, SF);
-		
-		if (event == null) {
-			//System.out.println("freq equals null");
-			return null;
-		}
-		
-		return event;
+	    for(FFT fft : FFTs) {
+	        List<SensorEvent3D> eventSet = events.getLastEvents(fft.getDataLength());
+	        
+	        if (eventSet.size() < fft.getDataLength()) {
+	            //System.out.println("not enought points");
+	            return;
+	        }
+	        
+	        Double SF = frequencyProcessor.getFrequency((long) 2000000);
+	        fft.newSensorEvent(eventSet, SF);
+	    }
 	}
 	
 	private boolean timeForNewEvent(SensorEvent event ) {

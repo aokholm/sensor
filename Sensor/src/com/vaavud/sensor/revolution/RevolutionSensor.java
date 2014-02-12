@@ -10,10 +10,9 @@ import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessorRef;
 
 public class RevolutionSensor extends ProcessingSensor implements SensorListener{
 	
-	private SensorListener listener;
+    private SensorListener listener;
 	private MagneticProcessor magneticProcessor;
 	private MagneticProcessorRef magneticProcessorRef;
-	
 	
 	public RevolutionSensor(RevSensorConfig config) {
 	    magneticProcessorRef = new MagneticProcessorRef(config.revSensorUpdateRateUs);
@@ -23,11 +22,7 @@ public class RevolutionSensor extends ProcessingSensor implements SensorListener
 	@Override
 	public void newEvent(SensorEvent event) {
 		if (event.getSensor().getType() == Sensor.Type.MAGNETIC_FIELD) {
-			SensorEvent newEvent = (magneticProcessor).addMeasurement((SensorEvent3D) event);
-			
-			if (newEvent != null) {
-				listener.newEvent(newEvent);
-			}
+			magneticProcessor.addMeasurement((SensorEvent3D) event);
 			
 			SensorEvent newEventRef = (magneticProcessorRef).addMeasurement((SensorEvent3D) event);
             if (newEventRef != null) {
@@ -40,6 +35,7 @@ public class RevolutionSensor extends ProcessingSensor implements SensorListener
 	@Override
 	public void setReciever(SensorListener listener) {
 		this.listener = listener;
+		magneticProcessor.setListener(listener);
 	}
 
 	@Override

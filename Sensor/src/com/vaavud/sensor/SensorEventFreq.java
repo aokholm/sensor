@@ -11,7 +11,6 @@ public class SensorEventFreq extends SensorEvent {
         this.freq = freq;
         this.amp = amp;
         this.sf = sf;
-        // TODO Auto-generated constructor stub
     }
     
     public double getFreq() {

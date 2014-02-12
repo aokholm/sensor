@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.vaavud.sensor.Sensor;
-import com.vaavud.sensor.Sensor.Type;
 import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorEvent3D;
 import com.vaavud.sensor.SensorEventFreq;
+import com.vaavud.sensor.SensorListener;
 import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
 import com.vaavud.sensor.internal.processor.magnetic.model.MeasurementPoint;
 
@@ -34,11 +34,8 @@ public class FFT {
     private double[] filter;
     private boolean filtering;
     private Sensor sensor;
-
-    public static enum Window {
-        RETANGULAR_WINDOW, WELCH_WINDOW
-    }
-
+    private SensorListener listener;
+    
     public static enum Interpolation {
         NO_INTERPOLATION, QUADRATIC_INTERPOLATION, LOGARITHMIC_INTERPOLATION
     }
@@ -54,10 +51,10 @@ public class FFT {
 
     public FFT(Integer dataLength, Integer FFTLength, Window windowType,
             Interpolation interpolationType, Filter filterType,
-            Integer movingAverage) {
+            Integer movingAverage, Sensor sensor, SensorListener listener) {
 
-        this.sensor = new Sensor(Type.FREQUENCY, "Freq_1");
-
+        this.sensor = sensor;
+        this.listener = listener;
         this.dataLength = dataLength;
         this.FFTLength = FFTLength;
         this.interpolationType = interpolationType;
@@ -68,7 +65,7 @@ public class FFT {
         myFFTAlgorithm = new FFTAlgorithm(FFTLength);
     }
 
-    public SensorEvent getSensorEvent(List<SensorEvent3D> events, Double SF) {
+    public void newSensorEvent(List<SensorEvent3D> events, Double SF) {
 
         List<Double> xAxis = new ArrayList<Double>(dataLength);
         List<Double> yAxis = new ArrayList<Double>(dataLength);
@@ -80,26 +77,25 @@ public class FFT {
             zAxis.add(events.get(i).getZ());
         }
 
-        List<Double> fftResultx = fftResult(xAxis);
-        List<Double> fftResulty = fftResult(yAxis);
-        List<Double> fftResultz = fftResult(zAxis);
+        List<Double> fftResultx = fftResult(xAxis); 
+        List<Double> fftResulty = fftResult(yAxis);// TODO returns 129 and not 128, could be a mistake
+        List<Double> fftResultz = fftResult(zAxis); 
 
         if (fftResultx == null) {
-            return null;
+            return;
         }
 
         if (fftResulty == null) {
-            return null;
-        }
+            return;
+        } 
 
         if (fftResultz == null) {
-            return null;
+            return;
         }
 
         @SuppressWarnings("unchecked")
-        List<Double> averageFftResult = averageFftResult(Arrays
-                .<List<Double>> asList(fftResultx, fftResulty, fftResultz));
-
+        List<Double> averageFftResult = averageLists(fftResultx, fftResulty, fftResultz); 
+        
         if (filtering) {
             applyFilter(averageFftResult);
         }
@@ -107,14 +103,14 @@ public class FFT {
         FreqAmp freqAmp = speedAndAmpFromFFTResult(averageFftResult, SF);
 
         if (freqAmp == null) {
-            return null;
+            return;
         }
 
         SensorEvent event = new SensorEventFreq(sensor,
                 events.get(events.size() - 1).getTimeUs(), freqAmp.frequency, freqAmp.amplitude, SF);
-        return event;
+        listener.newEvent(event);
     }
-
+    
     public List<Double> fftResult(List<Double> oneAxisData) {
 
         oneAxisData = applyZeroMean(oneAxisData);
@@ -129,7 +125,9 @@ public class FFT {
 
         return myFFTAlgorithm.doFFT(oneAxisData);
     }
-
+    
+    
+    // legacy / reference method
     public MeasurementPoint getFreqAndAmp3DFFT(
             List<MagneticPoint> magneticPoints, Double sampleFrequency) {
 
@@ -238,7 +236,7 @@ public class FFT {
             double p = 0.5d * (alph - gamma) / (alph - 2 * beta + gamma);
 
             peakFrequency = (double) ((maxBin + p) * sampleFrequency / FFTLength);
-            peakAmplitude = (double) (beta - 1 / 4 * (alph - gamma) * p);
+            peakAmplitude = (double) (beta - 1 / 4.0 * (alph - gamma) * p);
             break;
 
         case LOGARITHMIC_INTERPOLATION:
@@ -283,26 +281,23 @@ public class FFT {
         return data;
     }
 
-    private List<Double> averageFftResult(List<List<Double>> fftresults) {
+    private List<Double> averageLists(List<Double> ... fftresults) {
 
-        // double[] result = new double[fftresults.get(0).size()];
-        List<Double> result = new ArrayList<Double>(fftresults.get(0).size());
-        int j = 0;
+        double[] result = new double[fftresults[0].size()];
+        
         for (List<Double> fftResult : fftresults) {
             for (int i = 0; i < fftResult.size(); i++) {
-                if (j == 0) {
-                    result.add(fftResult.get(i));
-                } else {
-                    result.set(i, result.get(i) + fftResult.get(i));
-                }
+                result[i] = result[i] + fftResult.get(i);
             }
         }
-
-        for (Double item : result) {
-            item = item / fftresults.size();
+        
+        List<Double> resultList = new ArrayList<Double>(fftresults[0].size());
+        
+        for (double item : result) {
+            resultList.add(item / fftresults.length);
         }
-
-        return result;
+        
+        return resultList;
     }
 
     private void applyFilter(List<Double> list) {
@@ -313,22 +308,11 @@ public class FFT {
 
     private void generatePrecalculatedWindowValues(Window windowType) {
         windowValues = new double[dataLength];
-
-        if (windowType == Window.RETANGULAR_WINDOW) {
-            for (int i = 0; i < windowValues.length; i++) {
-                windowValues[i] = 1;
-            }
-        } else if (windowType == Window.WELCH_WINDOW) {
-            for (int i = 0; i < windowValues.length; i++) {
-                windowValues[i] = 1 - Math.pow(
-                        (i - (double) (dataLength - 1) / 2)
-                                / ((double) (dataLength + 1) / 2), 2);
-            }
-        } else {
-
-            // Log.e(MainActivity.TAG, "Unsuported WindowType");
-            generatePrecalculatedWindowValues(Window.RETANGULAR_WINDOW);
+        
+        for (int bin = 0; bin < dataLength; bin++) {
+            windowValues[bin] = windowType.window(bin, dataLength)*windowType.scalingFactor();
         }
+        
     }
 
     private void generatePrecalculatedFilterValues(Filter filterType,
@@ -372,7 +356,11 @@ public class FFT {
         } else {
             filtering = true;
         }
+        
+        
 
     }
+    
+    
 
 }

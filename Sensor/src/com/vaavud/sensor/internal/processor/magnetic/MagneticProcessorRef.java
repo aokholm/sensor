@@ -9,7 +9,6 @@ import com.vaavud.sensor.SensorEvent3D;
 import com.vaavud.sensor.SensorEventFreq;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
-import com.vaavud.sensor.internal.processor.magnetic.FFT.Window;
 import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
 import com.vaavud.sensor.internal.processor.magnetic.model.MeasurementPoint;
 
@@ -22,7 +21,7 @@ public class MagneticProcessorRef {
 	private Sensor sensor;
 	public MagneticProcessorRef(long rateUs) {
 		this.mPList = new MagneticPointList();
-		this.normalFFT = new FFT(70, 128, Window.WELCH_WINDOW, Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null);
+		this.normalFFT = new FFT(70, 128, Window.WELCH_WINDOW, Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null, null, null);
 		this.rateUs = rateUs;
 		this.sensor = new Sensor(Type.FREQUENCY, "Freq_Reference");
 	}

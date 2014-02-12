@@ -17,7 +17,6 @@ public final class Sensor {
   public Sensor(Type type, String name) {
     this.type = type;
     this.name = name;
-    // TODO Auto-generated constructor stub
   }
 
   public Type getType() {
