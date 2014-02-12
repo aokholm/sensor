@@ -13,12 +13,18 @@ public final class Sensor {
   
   private final Type type;
   private final String name;
+  private Object descriptor = null;
+  
   
   public Sensor(Type type, String name) {
     this.type = type;
     this.name = name;
   }
 
+  public void setDescriptor(Object descriptor) {
+    this.descriptor = descriptor;
+}
+  
   public Type getType() {
     return type;
   }
@@ -28,8 +34,8 @@ public final class Sensor {
   }
 
   @Override
-  public String toString() {
-    return "Sensor [type=" + type + ", name=" + name + "]";
-  }
+public String toString() {
+    return "Sensor [type=" + type + ", name=" + name + ", descriptor=" + descriptor + "]";
+}
   
 }

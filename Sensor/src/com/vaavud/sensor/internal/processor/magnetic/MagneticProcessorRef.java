@@ -21,7 +21,7 @@ public class MagneticProcessorRef {
 	private Sensor sensor;
 	public MagneticProcessorRef(long rateUs) {
 		this.mPList = new MagneticPointList();
-		this.normalFFT = new FFT(70, 128, Window.WELCH_WINDOW, Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null, null, null);
+		this.normalFFT = new FFT(70, 128, Window.WELCH, Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null, null, null);
 		this.rateUs = rateUs;
 		this.sensor = new Sensor(Type.FREQUENCY, "Freq_Reference");
 	}

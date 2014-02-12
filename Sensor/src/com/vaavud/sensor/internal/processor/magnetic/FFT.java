@@ -29,6 +29,9 @@ public class FFT {
     private Integer FFTLength;
     private Interpolation interpolationType;
     private FFTAlgorithm myFFTAlgorithm;
+    private Window windowType;
+    private Filter filterType;
+    private Integer movingAverage;
 
     private double[] windowValues;
     private double[] filter;
@@ -53,12 +56,19 @@ public class FFT {
             Interpolation interpolationType, Filter filterType,
             Integer movingAverage, Sensor sensor, SensorListener listener) {
 
-        this.sensor = sensor;
-        this.listener = listener;
         this.dataLength = dataLength;
         this.FFTLength = FFTLength;
+        this.windowType = windowType;
         this.interpolationType = interpolationType;
-
+        this.filterType = filterType;
+        this.movingAverage = movingAverage;
+        this.sensor = sensor;
+        this.listener = listener;
+        
+        if (sensor != null) { // for support of MagneticProcessorRef
+            sensor.setDescriptor(this);
+        }
+            
         generatePrecalculatedWindowValues(windowType);
         generatePrecalculatedFilterValues(filterType, movingAverage);
 
@@ -356,9 +366,13 @@ public class FFT {
         } else {
             filtering = true;
         }
-        
-        
+    }
 
+    @Override
+    public String toString() {
+        return "FFT [dataLength=" + dataLength + ", FFTLength=" + FFTLength + ", interpolationType="
+                + interpolationType + ", windowType=" + windowType + ", filterType=" + filterType + ", movingAverage="
+                + movingAverage + "]";
     }
     
     

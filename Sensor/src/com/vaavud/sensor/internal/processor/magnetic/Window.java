@@ -1,7 +1,7 @@
 package com.vaavud.sensor.internal.processor.magnetic;
 
 public enum Window {
-    RETANGULAR_WINDOW{
+    RETANGULAR{
         @Override
         public Double window(int bin, int length) {
             return 1D;
@@ -12,7 +12,7 @@ public enum Window {
             return 1d;
         }
     }, 
-    WELCH_WINDOW {
+    WELCH {
         @Override
         public Double window(int bin, int length) {
             // since periodic we add one to length, but still only use the first N samples
@@ -24,7 +24,7 @@ public enum Window {
         }
         @Override
         public Double scalingFactor() {
-            // Signal Processing for Intelligent Sensor Systems p. 109 // might not be totally accurate
+            // Signal Processing for Intelligent Sensor Systems p. 109 // Not totally accurate
             return 1.55d;
         }
         

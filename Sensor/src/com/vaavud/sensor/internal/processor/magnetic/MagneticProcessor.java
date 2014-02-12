@@ -34,14 +34,15 @@ public class MagneticProcessor{
 	    
 	  FFTs = new ArrayList<FFT>();  
 	    
-	  FFTs.add(getFFT(0.5, testSF));
-	  FFTs.add(getFFT(1d, testSF));
-	  FFTs.add(getFFT(2.0, testSF));
+	  FFTs.add(getFFT(0.5, testSF, Window.BLACK_MAN));
+//	  FFTs.add(getFFT(0.5, testSF, Window.HANN));
+	  FFTs.add(getFFT(1d, testSF, Window.BLACK_MAN));
+//	  FFTs.add(getFFT(2.0, testSF));
 	  
 	  initialized = true;
     }
 	
-	private FFT getFFT(Double timeConstant, Double testSF) {
+	private FFT getFFT(Double timeConstant, Double testSF, Window window) {
 	      int dataLength = (int) Math.round(testSF*timeConstant);
 	      int fftLength = 16;
 	      
@@ -49,9 +50,9 @@ public class MagneticProcessor{
 	        fftLength = fftLength*2;
 	      }
 	      
-	      Sensor sensor = new Sensor(Type.FREQUENCY, timeConstant.toString().concat(" new"));
+	      Sensor sensor = new Sensor(Type.FREQUENCY, timeConstant.toString().concat(" ").concat(window.toString()).concat(" new"));
 	        
-	      return new FFT(dataLength, fftLength, Window.HANN, 
+	      return new FFT(dataLength, fftLength, window, 
 	            Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null, sensor, listener); 
 	    
 	}
@@ -82,7 +83,6 @@ public class MagneticProcessor{
 	        List<SensorEvent3D> eventSet = events.getLastEvents(fft.getDataLength());
 	        
 	        if (eventSet.size() < fft.getDataLength()) {
-	            //System.out.println("not enought points");
 	            return;
 	        }
 	        
