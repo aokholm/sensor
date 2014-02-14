@@ -1,4 +1,4 @@
-package com.vaavud.sensor.internal.processor.magnetic;
+package com.vaavud.sensor.ref.internal.processor.magnetic;
 
 import java.util.List;
 
@@ -7,22 +7,26 @@ import com.vaavud.sensor.Sensor.Type;
 import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorEvent3D;
 import com.vaavud.sensor.SensorEventFreq;
+import com.vaavud.sensor.internal.processor.magnetic.FFT;
+import com.vaavud.sensor.internal.processor.magnetic.MagneticPointList;
+import com.vaavud.sensor.internal.processor.magnetic.Window;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
-import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
-import com.vaavud.sensor.internal.processor.magnetic.model.MeasurementPoint;
+import com.vaavud.sensor.ref.internal.processor.magnetic.model.MagneticPoint;
+import com.vaavud.sensor.ref.internal.processor.magnetic.model.MeasurementPoint;
+import com.vaavud.sensor.revolution.RevSensorConfig;
 
 public class MagneticProcessorRef {
 
 	private FFT normalFFT;
 	private MagneticPointList mPList;
 	private long nextEventUs;
-	private long rateUs;
+	private int rateUs;
 	private Sensor sensor;
-	public MagneticProcessorRef(long rateUs) {
+	public MagneticProcessorRef(RevSensorConfig config) {
 		this.mPList = new MagneticPointList();
-		this.normalFFT = new FFT(70, 128, Window.WELCH, Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null, null, null);
-		this.rateUs = rateUs;
+		this.normalFFT = new FFT(70, 128, Window.WELCH, Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null, null, null, null);
+		this.rateUs = config.getRevSensorRateUs();
 		this.sensor = new Sensor(Type.FREQUENCY, "Freq_Reference");
 	}
 	

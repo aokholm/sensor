@@ -1,4 +1,4 @@
-package com.vaavud.sensor.internal.processor.magnetic;
+package com.vaavud.sensor.ref.internal.processor.magnetic;
 
 import java.util.ArrayList;
 import java.util.List;

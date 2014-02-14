@@ -1,4 +1,4 @@
-package com.vaavud.sensor.internal.processor.magnetic.model;
+package com.vaavud.sensor.ref.internal.processor.magnetic.model;
 
 public class MeasurementPoint {
 	private double time;

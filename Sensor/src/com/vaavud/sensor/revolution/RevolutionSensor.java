@@ -6,35 +6,29 @@ import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorEvent3D;
 import com.vaavud.sensor.SensorListener;
 import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessor;
-import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessorRef;
 
 public class RevolutionSensor extends ProcessingSensor implements SensorListener{
 	
-    private SensorListener listener;
 	private MagneticProcessor magneticProcessor;
-	private MagneticProcessorRef magneticProcessorRef;
 	
 	public RevolutionSensor(RevSensorConfig config) {
-	    magneticProcessorRef = new MagneticProcessorRef(config.revSensorUpdateRateUs);
-		magneticProcessor = new MagneticProcessor(config.revSensorUpdateRateUs);
+		magneticProcessor = new MagneticProcessor(config);
+	}
+	
+	public RevolutionSensor() {
+	    this(new RevSensorConfig());
 	}
 	
 	@Override
 	public void newEvent(SensorEvent event) {
 		if (event.getSensor().getType() == Sensor.Type.MAGNETIC_FIELD) {
 			magneticProcessor.addMeasurement((SensorEvent3D) event);
-			
-			SensorEvent newEventRef = (magneticProcessorRef).addMeasurement((SensorEvent3D) event);
-            if (newEventRef != null) {
-               listener.newEvent(newEventRef);
-            }
 		}
-		// Should implement more sensor types...
+		// TODO implement more sensor types...
 	}
 
 	@Override
 	public void setReciever(SensorListener listener) {
-		this.listener = listener;
 		magneticProcessor.setListener(listener);
 	}
 

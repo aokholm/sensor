@@ -12,6 +12,7 @@ import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
 import com.vaavud.sensor.internal.processor.util.FrequencyProcessor;
 import com.vaavud.sensor.internal.processor.util.SensorEventList;
+import com.vaavud.sensor.revolution.RevSensorConfig;
 
 public class MagneticProcessor{
 
@@ -22,10 +23,12 @@ public class MagneticProcessor{
 	private boolean initialized;
 	private FrequencyProcessor frequencyProcessor;
 	private SensorListener listener;
+	private RevSensorConfig config;
 	
-	public MagneticProcessor(long rateUs) {
+	public MagneticProcessor(RevSensorConfig config) {
+	    this.config = config;
 		events = new SensorEventList<SensorEvent3D>();
-		this.rateUs = rateUs;
+		this.rateUs = config.getRevSensorRateUs();
 		frequencyProcessor = new FrequencyProcessor(events);
 		initialized = false;
 	}
@@ -35,9 +38,8 @@ public class MagneticProcessor{
 	  FFTs = new ArrayList<FFT>();  
 	    
 	  FFTs.add(getFFT(0.5, testSF, Window.BLACK_MAN));
-//	  FFTs.add(getFFT(0.5, testSF, Window.HANN));
-	  FFTs.add(getFFT(1d, testSF, Window.BLACK_MAN));
-//	  FFTs.add(getFFT(2.0, testSF));
+	  FFTs.add(getFFT(1.0, testSF, Window.BLACK_MAN));
+	  FFTs.add(getFFT(2.5, testSF, Window.BLACK_MAN));
 	  
 	  initialized = true;
     }
@@ -50,10 +52,13 @@ public class MagneticProcessor{
 	        fftLength = fftLength*2;
 	      }
 	      
+	      double highPass = 1/timeConstant*1.6;
+	      
 	      Sensor sensor = new Sensor(Type.FREQUENCY, timeConstant.toString().concat(" ").concat(window.toString()).concat(" new"));
 	        
 	      return new FFT(dataLength, fftLength, window, 
-	            Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, null, sensor, listener); 
+	            Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, 
+	            config.getMovAvg(), sensor, listener, highPass); 
 	    
 	}
 	

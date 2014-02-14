@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaavud.sensor.internal.processor.magnetic.model.MagneticPoint;
+import com.vaavud.sensor.ref.internal.processor.magnetic.model.MagneticPoint;
 
 public class MagneticPointList {
 	
