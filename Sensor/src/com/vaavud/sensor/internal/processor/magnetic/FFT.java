@@ -1,7 +1,6 @@
 package com.vaavud.sensor.internal.processor.magnetic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.vaavud.sensor.Sensor;
@@ -9,8 +8,6 @@ import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorEvent3D;
 import com.vaavud.sensor.SensorEventFreq;
 import com.vaavud.sensor.SensorListener;
-import com.vaavud.sensor.ref.internal.processor.magnetic.model.MagneticPoint;
-import com.vaavud.sensor.ref.internal.processor.magnetic.model.MeasurementPoint;
 
 public class FFT {
 
@@ -46,11 +43,6 @@ public class FFT {
 
     public static enum Filter {
         NO_FILTER, ANGULAR_FILTER
-    }
-
-    // axis
-    public static enum Axis {
-        X, Y, Z
     }
 
     public FFT(Integer dataLength, Integer FFTLength, Window windowType,
@@ -141,85 +133,7 @@ public class FFT {
 
         return myFFTAlgorithm.doFFT(oneAxisData);
     }
-    
-    
-    // legacy / reference method
-    public MeasurementPoint getFreqAndAmp3DFFT(
-            List<MagneticPoint> magneticPoints, Double sampleFrequency) {
 
-        double frequencyMean;
-        double frequencyRMSD;
-        double amplitudeMean;
-
-        List<Double> xAxis = new ArrayList<Double>(dataLength);
-        List<Double> yAxis = new ArrayList<Double>(dataLength);
-        List<Double> zAxis = new ArrayList<Double>(dataLength);
-
-        for (int i = 0; i < magneticPoints.size(); i++) {
-            xAxis.add(magneticPoints.get(i).getX());
-            yAxis.add(magneticPoints.get(i).getY());
-            zAxis.add(magneticPoints.get(i).getZ());
-        }
-
-        FreqAmp myFAx = getFreqAndAmpOneAxisFFT(xAxis, sampleFrequency);
-        if (myFAx == null) {
-            return null;
-        }
-
-        FreqAmp myFAy = getFreqAndAmpOneAxisFFT(yAxis, sampleFrequency);
-        if (myFAy == null) {
-            return null;
-        }
-
-        FreqAmp myFAz = getFreqAndAmpOneAxisFFT(zAxis, sampleFrequency);
-        if (myFAz == null) {
-            return null;
-        }
-
-        // calculate frequency RMS
-
-        frequencyMean = (myFAx.frequency + myFAy.frequency + myFAz.frequency) / 3;
-        frequencyRMSD = Math.sqrt(0.3333333333D
-                * Math.pow(myFAx.frequency - frequencyMean, 2)
-                + Math.pow(myFAy.frequency - frequencyMean, 2)
-                + Math.pow(myFAz.frequency - frequencyMean, 2));
-        amplitudeMean = (myFAx.amplitude + myFAy.amplitude + myFAz.amplitude) / 3;
-
-        // System.out.println(String.format("wind: %f, %f, %f amp:  %f, %f, %f, fRMSD: %f",
-        // myFAx.frequency, myFAy.frequency, myFAz.frequency, myFAx.amplitude,
-        // myFAy.amplitude, myFAz.amplitude, frequencyRMSD));
-
-        if (frequencyRMSD < 0.2 && frequencyMean > 1 && amplitudeMean > 0.3) {
-            MeasurementPoint meanCoreMeasurementPoint = new MeasurementPoint(
-                    frequencyMean, amplitudeMean);
-            return meanCoreMeasurementPoint;
-        }
-
-        return null;
-    }
-
-    public FreqAmp getFreqAndAmpOneAxisFFT(List<Double> oneAxisData,
-            Double sampleFrequency) {
-
-        List<Double> fftresult;
-
-        oneAxisData = applyZeroMean(oneAxisData);
-        oneAxisData = windowData(oneAxisData);
-
-        int i = 0;
-        while (oneAxisData.get(i).doubleValue() == 0f) {
-            i++;
-            if (i == oneAxisData.size())
-                return null;
-        }
-
-        fftresult = myFFTAlgorithm.doFFT(oneAxisData);
-
-        FreqAmp mySpeedAndAmp = speedAndAmpFromFFTResult(fftresult,
-                sampleFrequency.doubleValue());
-
-        return mySpeedAndAmp;
-    }
 
     private FreqAmp speedAndAmpFromFFTResult(List<Double> fftResult,
             Double sampleFrequency) {

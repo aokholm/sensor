@@ -3,9 +3,6 @@ package com.vaavud.sensor.ref.internal.processor.magnetic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaavud.sensor.internal.processor.magnetic.FFT.Axis;
-import com.vaavud.sensor.ref.internal.processor.magnetic.model.MagneticPoint;
-
 public class FFTAlgorithm {
 
 	private int FFTLength, m;
@@ -39,67 +36,29 @@ public class FFTAlgorithm {
 		y = new double[n];
 	}
 
-	public List<Double> doFFT(List<Double> realData) {
+   public List<Double> doFFT(List<Double> realData) {
 
-		for (int i = 0; i < FFTLength; i++) {
-			if (i < realData.size()) {
-				x[i] = realData.get(i);
-			}
-			else {
-				x[i] = 0;
-			}
-			y[i] = 0;
-		}
+        for (int i = 0; i < FFTLength; i++) {
+            if (i < realData.size()) {
+                x[i] = realData.get(i);
+            }
+            else {
+                x[i] = 0;
+            }
+            y[i] = 0;
+        }
 
-		fft(x, y);
+        fft(x, y);
 
-		List<Double> fftPower = new ArrayList<Double>(FFTLength / 2 + 1);
+        List<Double> fftPower = new ArrayList<Double>(FFTLength / 2 + 1);
 
-		for (int i = 0; i < (FFTLength / 2 + 1); i++) {
-			fftPower.add((double) (Math.sqrt(Math.pow(x[i], 2)
-					+ Math.pow(y[i], 2)) * 2 / realData.size()));
-		}
+        for (int i = 0; i < (FFTLength / 2 + 1); i++) {
+            fftPower.add((double) (Math.sqrt(Math.pow(x[i], 2)
+                    + Math.pow(y[i], 2)) * 2 / realData.size()));
+        }
 
-		return fftPower;
-	}
-
-	public List<Double> doFFT(List<MagneticPoint> magneticPoints, Axis axis) {
-		
-		
-		for (int i = 0; i < FFTLength; i++) {
-			if (i < magneticPoints.size()) {
-				switch (axis) {
-				case X:
-					x[i] = magneticPoints.get(i).getX();
-					break;
-				case Y:
-					x[i] = magneticPoints.get(i).getY();
-					break;
-				case Z:
-					x[i] = magneticPoints.get(i).getZ();
-					break;
-				default:
-					break;
-				}
-			}
-			else {
-				x[i] = 0;
-			}
-			y[i] = 0;
-		}
-
-		fft(x, y);
-
-		List<Double> fftPower = new ArrayList<Double>(FFTLength / 2 + 1);
-
-		for (int i = 0; i < (FFTLength / 2 + 1); i++) {
-			fftPower.add((double) (Math.sqrt(Math.pow(x[i], 2)
-					+ Math.pow(y[i], 2)) * 2 / FFTLength));
-		}
-
-		return fftPower;
-	}
-	
+        return fftPower;
+    }
 	
 	private void fft(double[] x, double[] y) {
 		int i, j, k, n1, n2, a;
