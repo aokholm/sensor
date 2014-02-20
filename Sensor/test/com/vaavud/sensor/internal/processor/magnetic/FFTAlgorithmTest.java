@@ -3,16 +3,13 @@
  */
 package com.vaavud.sensor.internal.processor.magnetic;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.awt.image.SinglePixelPackedSampleModel;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**

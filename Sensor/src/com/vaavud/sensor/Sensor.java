@@ -8,7 +8,8 @@ public final class Sensor {
     FREQUENCY,
     WINDSPEED,
     TEMPERATURE,
-    PRESSURE
+    PRESSURE,
+    SAMPLE_FREQUENCY,
   }
   
   private final Type type;

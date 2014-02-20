@@ -6,13 +6,16 @@ import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorEvent3D;
 import com.vaavud.sensor.SensorListener;
 import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessor;
+import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessorTest;
 
 public class RevolutionSensor extends ProcessingSensor implements SensorListener{
 	
+	private MagneticProcessorTest magneticProcessorTest;
 	private MagneticProcessor magneticProcessor;
 	
 	public RevolutionSensor(RevSensorConfig config) {
-		magneticProcessor = new MagneticProcessor(config);
+	    magneticProcessor = new MagneticProcessor(config);
+		magneticProcessorTest = new MagneticProcessorTest(config);
 	}
 	
 	public RevolutionSensor() {
@@ -22,14 +25,16 @@ public class RevolutionSensor extends ProcessingSensor implements SensorListener
 	@Override
 	public void newEvent(SensorEvent event) {
 		if (event.getSensor().getType() == Sensor.Type.MAGNETIC_FIELD) {
-			magneticProcessor.addMeasurement((SensorEvent3D) event);
+			magneticProcessorTest.addMeasurement((SensorEvent3D) event);
+			//magneticProcessor.addMeasurement((SensorEvent3D) event);
 		}
 		// TODO implement more sensor types...
 	}
 
 	@Override
 	public void setReciever(SensorListener listener) {
-		magneticProcessor.setListener(listener);
+	    magneticProcessor.setListener(listener);
+		magneticProcessorTest.setListener(listener);
 	}
 
 	@Override

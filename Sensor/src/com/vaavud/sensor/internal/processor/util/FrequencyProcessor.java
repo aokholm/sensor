@@ -30,7 +30,7 @@ public class FrequencyProcessor {
     Long start = events.get(0).getTimeUs();
     Long end = events.get(events.size() -1).getTimeUs();
     if (end-start > Us) {
-      System.out.println("Divide N: " + nPoints + " start: " + start + "end: " + end);
+//      System.out.println("Divide N: " + nPoints + " start: " + start + "end: " + end);
       return getFrequencyPoints(nPoints/2, Us);
     }
     

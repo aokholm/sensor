@@ -7,49 +7,16 @@ import com.vaavud.sensor.Sensor;
 import com.vaavud.sensor.Sensor.Type;
 import com.vaavud.sensor.SensorEvent;
 import com.vaavud.sensor.SensorEvent3D;
-import com.vaavud.sensor.SensorEventFreq;
 import com.vaavud.sensor.SensorListener;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Filter;
-import com.vaavud.sensor.internal.processor.magnetic.FFT.FreqAmp;
 import com.vaavud.sensor.internal.processor.magnetic.FFT.Interpolation;
 import com.vaavud.sensor.internal.processor.util.FrequencyProcessor;
 import com.vaavud.sensor.internal.processor.util.SensorEventList;
 import com.vaavud.sensor.revolution.RevSensorConfig;
 
-public class MagneticProcessor{
+public class MagneticProcessorTest{
 
-    public class FFTconfig {
-        private final FFT fft;
-        private final double timeConstant;
-        private final Double transitionFreq;
-        private final Double transitionLength;
-
-        public FFTconfig(FFT fft, double timeConstant, Double transitionFreq, Double transitionLength) {
-            this.fft = fft;
-            this.timeConstant = timeConstant;
-            this.transitionFreq = transitionFreq;
-            this.transitionLength = transitionLength;
-        }
-
-        public FFT getFft() {
-            return fft;
-        }
-        
-        public double getTimeConstant() {
-            return timeConstant;
-        }
-        
-        public Double getTransitionFreq() {
-            return transitionFreq;
-        }
-        
-        public Double getTransitionLength() {
-            return transitionLength;
-        }
-        
-    }
-    
-	private List<FFTconfig> FFTconfigs;
+	private List<FFT> FFTs;
 	private SensorEventList<SensorEvent3D> events;
 	private long nextEventUs;
 	private long rateUs;
@@ -57,30 +24,27 @@ public class MagneticProcessor{
 	private FrequencyProcessor frequencyProcessor;
 	private SensorListener listener;
 	private RevSensorConfig config;
-	private Sensor sensor;
 	
-	public MagneticProcessor(RevSensorConfig config) {
+	public MagneticProcessorTest(RevSensorConfig config) {
 	    this.config = config;
 		events = new SensorEventList<SensorEvent3D>();
 		this.rateUs = config.getRevSensorRateUs();
 		frequencyProcessor = new FrequencyProcessor(events);
 		initialized = false;
-		sensor = new Sensor(Type.FREQUENCY, "Prototype");
 	}
 	
 	public void initialize(Double testSF) {
 	  
-	  FFTconfigs = new ArrayList<FFTconfig>();
+	  FFTs = new ArrayList<FFT>();
 	  
-	  FFTconfigs.add(new FFTconfig(getFFT(0.5, testSF, Window.BLACK_MAN), 0.5, 7.0, 0.0));
-	  FFTconfigs.add(new FFTconfig(getFFT(1.2, testSF, Window.BLACK_MAN), 1.2, 4.0, 0.0));
-	  FFTconfigs.add(new FFTconfig(getFFT(2.5, testSF, Window.BLACK_MAN), 2.5, 2.0, 0.0));
-	  
+      FFTs.add(getFFT(0.5, testSF, Window.BLACK_MAN, 100d, null));
+      FFTs.add(getFFT(1.0, testSF, Window.BLACK_MAN, null, null));
+      FFTs.add(getFFT(2.0, testSF, Window.BLACK_MAN, null, null));
 	  initialized = true;
 	  
     }
 	
-	private FFT getFFT(Double timeConstant, Double testSF, Window window) {
+	private FFT getFFT(Double timeConstant, Double testSF, Window window, Double lowPass, Double highPass) {
 	      int dataLength = (int) Math.round(testSF*timeConstant);
 	      int fftLength = 16;
 	      
@@ -88,9 +52,18 @@ public class MagneticProcessor{
 	        fftLength = fftLength*2;
 	      }
 	      
+	      if (lowPass == null) {
+	          lowPass = 1/timeConstant*9;
+	      }
+	      if (highPass == null) {
+	          highPass = 1/timeConstant*2;
+	      }
+	     
+	      Sensor sensor = new Sensor(Type.FREQUENCY, timeConstant.toString().concat(" ").concat(window.toString()).concat(" new"));
+	        
 	      return new FFT(dataLength, fftLength, window, 
 	            Interpolation.QUADRATIC_INTERPOLATION, Filter.NO_FILTER, 
-	            config.getMovAvg(), sensor, listener); 
+	            config.getMovAvg(), sensor, listener, highPass, lowPass); 
 	    
 	}
 	
@@ -107,7 +80,7 @@ public class MagneticProcessor{
 	      newEvent();
 	    }
 	    else {
-	      if (events.size() > 100) {
+	      if (events.size() > 50) {
             initialize(frequencyProcessor.getStartEndFrequency());  
           }
 	    }
@@ -116,23 +89,15 @@ public class MagneticProcessor{
 	
 	private void newEvent () {
 		
-	    for (FFTconfig fftConfig :FFTconfigs) {
-	        List<SensorEvent3D> eventSet = events.getLastEvents(fftConfig.getFft().getDataLength());
+	    for(FFT fft : FFTs) {
+	        List<SensorEvent3D> eventSet = events.getLastEvents(fft.getDataLength());
 	        
-	        if (eventSet.size() < fftConfig.getFft().getDataLength()) {
-                return;
-            }
-	        
-	        Double SF = frequencyProcessor.getFrequency((long) 2_000_000);
-	        
-	        FreqAmp freqAmp = fftConfig.getFft().getNewSensorEvent(eventSet, SF);
-	        
-	        if (freqAmp.frequency > fftConfig.transitionFreq) {
-	            SensorEvent event = new SensorEventFreq(sensor, freqAmp.timeUs, freqAmp.frequency, freqAmp.amplitude, SF, freqAmp.noise);
-	            listener.newEvent(event);
+	        if (eventSet.size() < fft.getDataLength()) {
 	            return;
 	        }
 	        
+	        Double SF = frequencyProcessor.getFrequency((long) 5_000_000);
+	        fft.newSensorEvent(eventSet, SF);
 	    }
 	}
 	

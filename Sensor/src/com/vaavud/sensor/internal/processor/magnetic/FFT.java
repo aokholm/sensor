@@ -15,10 +15,14 @@ public class FFT {
 
         public double frequency;
         public double amplitude;
-
-        FreqAmp(double frequency, double amplitude) {
+        public double noise;
+        public int timeUs;
+        
+        FreqAmp(long timeUs, double frequency, double amplitude, double noise) {
+            this.timeUs = (int) timeUs;
             this.frequency = frequency;
             this.amplitude = amplitude;
+            this.noise = noise;
         }
     }
 
@@ -30,6 +34,7 @@ public class FFT {
     private Filter filterType;
     private Integer movingAverage;
     private Double highPass;
+    private Double lowPass;
 
     private double[] windowValues;
     private double[] filter;
@@ -47,7 +52,7 @@ public class FFT {
 
     public FFT(Integer dataLength, Integer FFTLength, Window windowType,
             Interpolation interpolationType, Filter filterType,
-            Integer movingAverage, Sensor sensor, SensorListener listener, Double highPass) {
+            Integer movingAverage, Sensor sensor, SensorListener listener, Double highPass, Double lowPass) {
 
         this.dataLength = dataLength;
         this.FFTLength = FFTLength;
@@ -58,6 +63,7 @@ public class FFT {
         this.sensor = sensor;
         this.listener = listener;
         this.highPass = highPass;
+        this.lowPass = lowPass;
         
         if (sensor != null) { // for support of MagneticProcessorRef
             sensor.setDescriptor(this);
@@ -68,7 +74,43 @@ public class FFT {
 
         myFFTAlgorithm = new FFTAlgorithm(FFTLength);
     }
+    
+    public FFT(Integer dataLength, Integer FFTLength, Window windowType,
+            Interpolation interpolationType, Filter filterType,
+            Integer movingAverage, Sensor sensor, SensorListener listener) {
 
+        this(dataLength, FFTLength, windowType, interpolationType, filterType, movingAverage, sensor, listener, null, null);
+    }
+    
+    // FOR new method
+    public FreqAmp getNewSensorEvent(List<SensorEvent3D> events, Double SF) {
+        List<Double> xAxis = new ArrayList<Double>(dataLength);
+        List<Double> yAxis = new ArrayList<Double>(dataLength);
+        List<Double> zAxis = new ArrayList<Double>(dataLength);
+
+        for (int i = 0; i < events.size(); i++) {
+            xAxis.add(events.get(i).getX());
+            yAxis.add(events.get(i).getY());
+            zAxis.add(events.get(i).getZ());
+        }
+
+        List<Double> fftResultx = fftResult(xAxis); 
+        List<Double> fftResulty = fftResult(yAxis);// TODO returns 129 and not 128, could be a mistake
+        List<Double> fftResultz = fftResult(zAxis); 
+
+
+        @SuppressWarnings("unchecked")
+        List<Double> averageFftResult = averageLists(fftResultx, fftResulty, fftResultz); 
+        
+        if (filtering) {
+            applyFilter(averageFftResult);
+        }
+
+        FreqAmp freqAmp = speedAndAmpFromFFTResult(averageFftResult, SF, events.get(events.size() - 1).getTimeUs());
+        return freqAmp;
+    }
+    
+    // Test purpose
     public void newSensorEvent(List<SensorEvent3D> events, Double SF) {
 
         List<Double> xAxis = new ArrayList<Double>(dataLength);
@@ -85,17 +127,6 @@ public class FFT {
         List<Double> fftResulty = fftResult(yAxis);// TODO returns 129 and not 128, could be a mistake
         List<Double> fftResultz = fftResult(zAxis); 
 
-        if (fftResultx == null) {
-            return;
-        }
-
-        if (fftResulty == null) {
-            return;
-        } 
-
-        if (fftResultz == null) {
-            return;
-        }
 
         @SuppressWarnings("unchecked")
         List<Double> averageFftResult = averageLists(fftResultx, fftResulty, fftResultz); 
@@ -104,18 +135,28 @@ public class FFT {
             applyFilter(averageFftResult);
         }
 
-        FreqAmp freqAmp = speedAndAmpFromFFTResult(averageFftResult, SF);
-
-        if (freqAmp == null) {
-            return;
+        FreqAmp freqAmp = speedAndAmpFromFFTResult(averageFftResult, SF, events.get(events.size() - 1).getTimeUs());
+        
+        SensorEvent event;
+        
+        boolean freqPass = false;
+        
+        if (highPass != null && lowPass != null) {
+            if (freqAmp.frequency < highPass || freqAmp.frequency > lowPass) {
+                freqPass = true;
+            }
         }
         
-        if (freqAmp.frequency < highPass) {
-            return;
+        if (freqAmp == null || freqPass) {
+            event = new SensorEventFreq(sensor, 
+                    events.get(events.size() - 1).getTimeUs(), null, freqAmp.amplitude, SF, freqAmp.noise);
         }
         
-        SensorEvent event = new SensorEventFreq(sensor,
-                events.get(events.size() - 1).getTimeUs(), freqAmp.frequency, freqAmp.amplitude, SF);
+        else {
+            event = new SensorEventFreq(sensor, 
+                    events.get(events.size() - 1).getTimeUs(), freqAmp.frequency, freqAmp.amplitude, SF, freqAmp.noise);
+        }
+        
         listener.newEvent(event);
     }
     
@@ -136,12 +177,14 @@ public class FFT {
 
 
     private FreqAmp speedAndAmpFromFFTResult(List<Double> fftResult,
-            Double sampleFrequency) {
-
+            Double sampleFrequency, long timeUs) {
+        
         int maxBin = 1;
         double maxPeak = 0;
         double peakAmplitude;
         double peakFrequency;
+        double noise = 0;
+        double sn;
 
         // find the highest peak (bin)
         for (int i = 1; i < (FFTLength / 2); i++) {
@@ -150,7 +193,10 @@ public class FFT {
                 maxBin = i;
                 maxPeak = fftResult.get(i).doubleValue();
             }
+            noise = noise + fftResult.get(i);
         }
+        
+        noise = noise / (double) FFTLength/2;
 
         switch (interpolationType) {
         case NO_INTERPOLATION:
@@ -172,16 +218,18 @@ public class FFT {
         case LOGARITHMIC_INTERPOLATION:
             // not implemented yet
             interpolationType = Interpolation.NO_INTERPOLATION;
-            return speedAndAmpFromFFTResult(fftResult, sampleFrequency);
+            return speedAndAmpFromFFTResult(fftResult, sampleFrequency, timeUs);
 
         default:
             interpolationType = Interpolation.NO_INTERPOLATION;
-            return speedAndAmpFromFFTResult(fftResult, sampleFrequency);
+            return speedAndAmpFromFFTResult(fftResult, sampleFrequency, timeUs);
 
         }
-        return new FreqAmp(peakFrequency, peakAmplitude);
+        
+        sn = peakAmplitude/noise;      
+        return new FreqAmp(timeUs, peakFrequency, peakAmplitude, sn);
     }
-
+    
     public Integer getDataLength() {
         return dataLength;
     }

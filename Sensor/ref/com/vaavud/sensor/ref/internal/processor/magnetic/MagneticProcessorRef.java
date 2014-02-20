@@ -55,7 +55,7 @@ public class MagneticProcessorRef {
 		}
 		
 		SensorEventFreq event = new SensorEventFreq(sensor, 
-				mPList.last().getTimeUs(), coreMeasurementPoint.getFrequency(), coreMeasurementPoint.getAmplitude(), sampleF);	
+				mPList.last().getTimeUs(), coreMeasurementPoint.getFrequency(), coreMeasurementPoint.getAmplitude(), sampleF, null);	
 		return event;
 	}
 	
