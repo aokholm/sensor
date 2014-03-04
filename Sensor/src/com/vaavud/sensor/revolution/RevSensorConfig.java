@@ -13,6 +13,7 @@ public class RevSensorConfig {
 	private int revSensorRateUs;
 	private Integer movAvg;
 	private List<RevSensorType> revSensorTypes;
+	private boolean windtunnelTest;
 	
 	
 	public RevSensorConfig() {
@@ -25,6 +26,7 @@ public class RevSensorConfig {
 		this.revSensorRateUs = 100_000; // 0.1 s
 		this.movAvg = null;
 		revSensorTypes = new ArrayList<>();
+		this.windtunnelTest = false;
 	}
 	
 	public int getRevSensorRateUs() {
@@ -50,5 +52,15 @@ public class RevSensorConfig {
 	public void setMovAvg(Integer movAvg) {
         this.movAvg = movAvg;
     }
+
+    public boolean isWindtunnelTest() {
+        return windtunnelTest;
+    }
+
+    public void setWindtunnelTest(boolean windtunnelTest) {
+        this.windtunnelTest = windtunnelTest;
+    }
+	
+	
 	
 }

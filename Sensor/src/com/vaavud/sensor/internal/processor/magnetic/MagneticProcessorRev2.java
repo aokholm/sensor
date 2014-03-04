@@ -14,7 +14,7 @@ import com.vaavud.sensor.internal.processor.util.FrequencyProcessor;
 import com.vaavud.sensor.internal.processor.util.SensorEventList;
 import com.vaavud.sensor.revolution.RevSensorConfig;
 
-public class MagneticProcessorTest{
+public class MagneticProcessorRev2{
 
 	private List<FFT> FFTs;
 	private SensorEventList<SensorEvent3D> events;
@@ -25,7 +25,7 @@ public class MagneticProcessorTest{
 	private SensorListener listener;
 	private RevSensorConfig config;
 	
-	public MagneticProcessorTest(RevSensorConfig config) {
+	public MagneticProcessorRev2(RevSensorConfig config) {
 	    this.config = config;
 		events = new SensorEventList<SensorEvent3D>();
 		this.rateUs = config.getRevSensorRateUs();

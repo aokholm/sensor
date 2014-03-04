@@ -3,19 +3,23 @@ package com.vaavud.sensor.revolution;
 import com.vaavud.sensor.ProcessingSensor;
 import com.vaavud.sensor.Sensor;
 import com.vaavud.sensor.SensorEvent;
-import com.vaavud.sensor.SensorEvent3D;
 import com.vaavud.sensor.SensorListener;
-import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessor;
-import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessorTest;
+import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessorRev1;
+import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessorRev2;
+import com.vaavud.sensor.internal.processor.magnetic.MagneticProcessorWindTunnel;
 
 public class RevolutionSensor extends ProcessingSensor implements SensorListener{
 	
-	private MagneticProcessorTest magneticProcessorTest;
-	private MagneticProcessor magneticProcessor;
+	private MagneticProcessorRev2 magneticProcessorTest;
+	private MagneticProcessorRev1 magneticProcessor;
+	private MagneticProcessorWindTunnel magneticProcessorWindTunnel;
+	private SensorListener listener;
+	private RevSensorConfig config;
+	
 	
 	public RevolutionSensor(RevSensorConfig config) {
-	    magneticProcessor = new MagneticProcessor(config);
-		magneticProcessorTest = new MagneticProcessorTest(config);
+	    this.config = config;
+
 	}
 	
 	public RevolutionSensor() {
@@ -25,26 +29,34 @@ public class RevolutionSensor extends ProcessingSensor implements SensorListener
 	@Override
 	public void newEvent(SensorEvent event) {
 		if (event.getSensor().getType() == Sensor.Type.MAGNETIC_FIELD) {
-			magneticProcessorTest.addMeasurement((SensorEvent3D) event);
-			//magneticProcessor.addMeasurement((SensorEvent3D) event);
+			//magneticProcessorTest.addMeasurement((SensorEvent3D) event);
+//			magneticProcessor.newEvent(event);
+			magneticProcessorWindTunnel.newEvent(event);
 		}
 		// TODO implement more sensor types...
 	}
 
 	@Override
 	public void setReciever(SensorListener listener) {
-	    magneticProcessor.setListener(listener);
-		magneticProcessorTest.setListener(listener);
+	    this.listener = listener;
+
 	}
 
 	@Override
 	public void start() {
-		// do nothing
+        magneticProcessor = new MagneticProcessorRev1(config);
+        magneticProcessorTest = new MagneticProcessorRev2(config);
+        magneticProcessorWindTunnel = new MagneticProcessorWindTunnel(config);
+        magneticProcessor.setReciever(listener);
+        magneticProcessorTest.setListener(listener);
+        magneticProcessorWindTunnel.setReciever(listener);
 	}
 
 	@Override
 	public void stop() {
-		// do nothing
+	    magneticProcessor = null;
+	    magneticProcessorTest = null;
+	    magneticProcessorWindTunnel = null;
 	}
 
 	@Override
