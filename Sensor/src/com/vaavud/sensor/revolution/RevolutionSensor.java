@@ -29,7 +29,7 @@ public class RevolutionSensor extends ProcessingSensor implements SensorListener
 	@Override
 	public void newEvent(SensorEvent event) {
 		if (event.getSensor().getType() == Sensor.Type.MAGNETIC_FIELD) {
-			//magneticProcessorTest.addMeasurement((SensorEvent3D) event);
+//			magneticProcessorTest.newEvent(event);
 //			magneticProcessor.newEvent(event);
 			magneticProcessorWindTunnel.newEvent(event);
 		}

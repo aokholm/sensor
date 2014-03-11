@@ -14,7 +14,7 @@ import com.vaavud.sensor.internal.processor.util.FrequencyProcessor;
 import com.vaavud.sensor.internal.processor.util.SensorEventList;
 import com.vaavud.sensor.revolution.RevSensorConfig;
 
-public class MagneticProcessorRev2{
+public class MagneticProcessorRev2 extends MagneticProcessor{
 
 	private List<FFT> FFTs;
 	private SensorEventList<SensorEvent3D> events;
@@ -72,20 +72,21 @@ public class MagneticProcessorRev2{
     }
 	
 	
-	public void addMeasurement(SensorEvent3D event) {
-	  events.addEvent(event);
-	  
-	  if (timeForNewEvent(event)) {
-	    if (initialized) {
-	      newEvent();
-	    }
-	    else {
-	      if (events.size() > 50) {
-            initialize(frequencyProcessor.getStartEndFrequency());  
+    @Override
+    public void newEvent(SensorEvent event) {
+        events.addEvent((SensorEvent3D) event);
+        
+        if (timeForNewEvent(event)) {
+          if (initialized) {
+            newEvent();
           }
-	    }
-	  }
-	}
+          else {
+            if (events.size() > 50) {
+              initialize(frequencyProcessor.getStartEndFrequency());  
+            }
+          }
+        }
+    }
 	
 	private void newEvent () {
 		

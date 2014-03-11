@@ -14,6 +14,7 @@ public class RevSensorConfig {
 	private Integer movAvg;
 	private List<RevSensorType> revSensorTypes;
 	private boolean windtunnelTest;
+	private boolean liveTest;
 	
 	
 	public RevSensorConfig() {
@@ -27,6 +28,7 @@ public class RevSensorConfig {
 		this.movAvg = null;
 		revSensorTypes = new ArrayList<>();
 		this.windtunnelTest = false;
+		this.liveTest = false;
 	}
 	
 	public int getRevSensorRateUs() {
@@ -59,6 +61,14 @@ public class RevSensorConfig {
 
     public void setWindtunnelTest(boolean windtunnelTest) {
         this.windtunnelTest = windtunnelTest;
+    }
+
+    public boolean isLiveTest() {
+        return liveTest;
+    }
+
+    public void setLiveTest(boolean liveTest) {
+        this.liveTest = liveTest;
     }
 	
 	

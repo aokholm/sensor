@@ -35,8 +35,14 @@ public class MagneticProcessorWindTunnel extends MagneticProcessor{
 	  
 	  FFTs = new ArrayList<FFT>();
 	  
-
-      FFTs.add(getFFT(5.0, testSF, Window.BLACK_MAN, null, null));
+	  
+	  if (config.isLiveTest()) {
+	      FFTs.add(getFFT(3.0, testSF, Window.BLACK_MAN, null, null));
+	  } else {
+//	      FFTs.add(getFFT(0.5, testSF, Window.BLACK_MAN, null, null));
+	      FFTs.add(getFFT(1.0, testSF, Window.BLACK_MAN, null, null));
+	      FFTs.add(getFFT(3.0, testSF, Window.BLACK_MAN, null, null)); 
+	  }
 	  initialized = true;
 	  
     }
@@ -82,7 +88,7 @@ public class MagneticProcessorWindTunnel extends MagneticProcessor{
 	            return;
 	        }
 	        
-	        Double SF = frequencyProcessor.getFrequency((long) 5_000_000);
+	        Double SF = frequencyProcessor.getFrequency((long) 3_000_000);
 	        fft.newSensorEvent(eventSet, SF);
 	    }
 	}
