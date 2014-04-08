@@ -39,9 +39,9 @@ public class MagneticProcessorWindTunnel extends MagneticProcessor{
 	  if (config.isLiveTest()) {
 	      FFTs.add(getFFT(3.0, testSF, Window.BLACK_MAN, null, null));
 	  } else {
-//	      FFTs.add(getFFT(0.5, testSF, Window.BLACK_MAN, null, null));
 	      FFTs.add(getFFT(1.0, testSF, Window.BLACK_MAN, null, null));
-	      FFTs.add(getFFT(3.0, testSF, Window.BLACK_MAN, null, null)); 
+	      FFTs.add(getFFT(3.0, testSF, Window.BLACK_MAN, null, null));
+	      FFTs.add(getFFT(5.0, testSF, Window.BLACK_MAN, null, null)); 
 	  }
 	  initialized = true;
 	  
